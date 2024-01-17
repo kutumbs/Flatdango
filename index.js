@@ -1,130 +1,56 @@
-
-document.addEventListener('DOMContentLoaded',()=>{
-
-    const moviePlaceHolder = ()=>{
-        fetch("http://localhost:3000/")
-        .then(res =>res.json())
-        .then(content =>{
-            const firstMovie = content.films[0]
-
-            const filmImg = document.getElementById("poster")
-            const movieTitle = document.getElementById("filmTitle")
-            const movieDescr = document.getElementById("movieDescription")
-            const runningTime = document.getElementById("runtime")
-            const showingTime = document.getElementById("showtime")
-            const availTicket =document.getElementById("ticketsAvailable")
-            filmImg.src = firstMovie.poster
-            movieTitle.innerText = firstMovie.title
-            movieDescr.innerText = firstMovie.description
-            runningTime.innerText =`Runtime: ${firstMovie.runtime} minutes`
-            showingTime.innerText =`Showtime: ${firstMovie.showtime}`
-            availTicket.innerText =`Tickets Available: (${firstMovie.capacity - firstMovie.tickets_sold})`
-
-
-            const ticketBuy = document.getElementById("buyTicket")
-            let tickets = Number(firstMovie.capacity - firstMovie.tickets_sold)
-
-            ticketBuy.addEventListener('click',()=>{
-                alert("sdftvghnij")
-
-                tickets--
-
-                
-
-                if(tickets <= 0){
-                    const frstMovie = document.getElementById("1")
-                    frstMovie.innerHTML=`${firstMovie.title}  <span class="badge bg-danger me-1">SOLD OUT</span>`
-
-                    availTicket.innerHTML = `Ticketd available:  <span class="badge bg-danger">SOLD OUT</span>`
-                }else{
-                    availTicket.innerText = `Tickets available: (${tickets})`
-                }
-            })
-
-        })
-
-
-
-
-    }
-
-
-
-    const movieDetails = ()=>{
-        fetch("http://localhost:3000/")
-        .then(response=>response.json())
-        .then(data=>{
-            const filmData = data.films
-            console.log(filmData)
-            for(let i = 0; i < filmData.length; i++){
-                let item = filmData[i]
-                console.log(item)
-                const movieList = document.createElement("li")
-                const list = document.getElementById("showingMovie")
-
-                movieList.classList.add("list-group-item", "border", "border-info", "sinema")
-
-                movieList.setAttribute('id',`${item.id}`)
-            
-                movieList.innerText = item.title
-                console.log(item.title)
-
-
-                list.appendChild(movieList)
-
-                movieList.addEventListener('click',()=>{
-                    const filmImage = document.getElementById("poster")
-                    const filmTitle = document.getElementById("filmTitle")
-                    const filmDescr = document.getElementById("movieDescription")
-                    const runTime = document.getElementById("runtime")
-                    const showTime = document.getElementById("showtime")
-                    const availTickets =document.getElementById("ticketsAvailable")
-
-
-                    filmImage.src = item.poster
-                    filmTitle.innerText = item.title
-                    filmDescr.innerText = item.description
-                    runTime.innerHTML =`Runtime:<span>${item.runtime}</span>`
-                    showTime.innerText =`Showtime: ${item.showtime}`
-                    availTickets.innerText =`Tickets available: (${item.capacity - item.tickets_sold})`
-
-                    const ticketsBuy = document.getElementById("buyTicket")
-                    let ticket = Number(item.capacity - item.tickets_sold)
-
-                    ticketsBuy.addEventListener('click',()=>{
-
-                        
-                        ticket --
-                        if(ticket <= 0){
-                            movieList.innerHTML =`${item.title} <span class="badge bg-danger">SOLD OUT</span>`
-
-                            availTickets.innerHTML = `Tickets available: <span class="badge bg-danger">SOLD OUT</span>`
-
-                        }else{
-
-                            availTickets.innerText = `Tickets available: (${ticket})`
-                        }
-                      
-
-
-                    })
-
-
-
-                })
-
-
-            }
-
-
-
-
-        })
-
-    }
-
-
-    movieDetails()
-    moviePlaceHolder()
-
-})
+function fetchFilms() {
+    fetch('https://api.npoint.io/0b2aef194151f5771a43/films/')
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error('Unable to fetch film data');
+        }
+      })
+      .then(data => renderFilms(data))
+      .catch(error => {
+        console.log(error);
+        renderErrorMessage();
+      });
+  }
+  
+  function renderFilms(data) {
+    const div = document.getElementById('card');
+    const ul = document.getElementById('films');
+  
+    data.forEach(movie => {
+      const li = document.createElement('li');
+      li.classList.add('pointer', 'bold-italic-text');
+      li.innerHTML = movie.title;
+  
+      const filmCard = document.createElement("div");
+      filmCard.classList.add('film-card');
+      filmCard.innerHTML = `
+        <img src="${movie.poster}" height="500px" width="300px"/>
+        <h2 class="bold-text">${movie.title}</h2>
+        <p class="bold-text">${movie.description}</p>
+        <p><span class="highlight bold-text">Runtime: ${movie.runtime}</span></p>
+        <p><span class="highlight bold-text">Showtime: ${movie.showtime}</span></p>
+        <p class="bold-italic-text">Available tickets: ${(movie.capacity) - (movie.tickets_sold)}</p>
+        <button class="buy-button">Buy ticket</button>
+      `;
+  
+      li.addEventListener('click', () => {
+        div.innerHTML = "";
+        div.appendChild(filmCard);
+        if (!filmCard.classList.contains('active')) {
+          filmCard.classList.add('active');
+          div.appendChild(filmCard);
+        }
+      });
+  
+      ul.appendChild(li);
+    });
+  }
+  
+  function renderErrorMessage() {
+    const div = document.getElementById('card');
+    div.innerText = "Unable to fetch film data. Please try again later.";
+  }
+  
+  fetchFilms();
